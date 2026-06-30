@@ -1,118 +1,129 @@
-# AI-Powered SOC Triage Lab: Automated Tier 1 Analyst Pipeline
+# AI-Powered SOC Triage Lab
 
-An automated, self-hosted Tier 1 Security Operations Center (SOC) analyst pipeline that ingests security telemetry from a Windows endpoint, performs local LLM-based triage using :contentReference[oaicite:0]{index=0} running :contentReference[oaicite:1]{index=1}, and escalates verified threats to responders via :contentReference[oaicite:2]{index=2}.
+## What it is
 
-The system integrates :contentReference[oaicite:3]{index=3} for detection and telemetry correlation and uses :contentReference[oaicite:4]{index=4} for orchestration.
-
-A deterministic safety bypass mechanism ensures high-severity alerts bypass LLM evaluation to reduce hallucination risk and guarantee incident escalation integrity.
+An automated Tier 1 SOC triage pipeline that processes security alerts from a Wazuh SIEM, applies rule-based escalation, and uses a local LLM (Llama 3.2 via Ollama) to classify and triage lower-severity events. High-severity alerts bypass the model and are directly escalated to responders through Discord.
 
 ---
 
-## 🔍 What It Does (In Brief)
+## What it does
 
-This project simulates a real-world SOC environment by acting as an automated Tier 1 analyst:
-
-- Polls security event logs from a Wazuh SIEM indexer every 50 seconds
-- Filters security noise (retaining rule levels ≥ 3)
-- Performs LLM-based triage on enriched telemetry (logs, commands, MITRE ATT&CK mappings)
-- Preserves endpoint metadata (IP, hostname, timestamps) via custom JavaScript reconstruction logic
-- Applies deterministic escalation rules:
-  - Severity ≥ 5 → immediate Discord escalation (no LLM decision)
-  - Severity < 5 → LLM triage and classification
+- Collects security telemetry from a Wazuh-managed endpoint environment
+- Filters and prioritizes alerts based on severity level
+- Sends medium and low severity events to a local LLM for classification
+- Automatically escalates high severity events without AI involvement
+- Sends structured incident reports to Discord for response actions
+- Preserves full endpoint context (host, IP, timestamp, process activity)
 
 ---
 
-## 🛠️ Stack Overview
+## How it was built
 
-| Component | Technology | Purpose |
-|-----------|------------|--------|
-| SIEM & Indexer | :contentReference[oaicite:5]{index=5} (Kali Linux) | Security event correlation, MITRE mapping |
-| Endpoint Agent | Wazuh Agent + Sysmon (Windows) | Process, registry, and task monitoring |
-| Orchestration | :contentReference[oaicite:6]{index=6} | Workflow automation and pipeline logic |
-| Reasoning Engine | :contentReference[oaicite:7]{index=7} + :contentReference[oaicite:8]{index=8} | Offline AI triage and classification |
-| Notifications | :contentReference[oaicite:9]{index=9} Webhooks | Incident reporting and alerting |
+The system was built as a modular SOC automation lab using virtualized infrastructure and open-source tooling.
 
----
-
-## 🚀 Capabilities
-
-### Multi-Event Parallel Processing
-- Batch processing (groups of 5 events)
-- Prevents LLM context overload during alert spikes
-
-### Deterministic Security Overrides
-- “Golden Override Rule”
-- Severity ≥ 5 bypasses AI reasoning entirely
-- Ensures guaranteed escalation path
-
-### Telemetry Preservation
-- Reconstructs and preserves:
-  - Hostname
-  - Device IP
-  - Event timestamps
-  - Raw telemetry context
-
-### Adversary Emulation Suite
-Non-destructive PowerShell-based simulations:
-- Registry persistence (Run keys)
-- Scheduled task persistence
-- DNS beaconing simulation
-- File staging / compression
-- Process injection chains (mock behavior)
+- Wazuh manager deployed on a Kali Linux virtual machine
+- Windows endpoint configured with Wazuh agent and Sysmon for telemetry generation
+- OpenSearch configured for external access to allow workflow integration
+- n8n used as the central orchestration engine for polling, routing, and processing alerts
+- Custom JavaScript functions used to parse and reconstruct alert payloads
+- Discord webhooks used for incident notification delivery
+- Local LLM inference implemented using Ollama running Llama 3.2
 
 ---
 
-## 🛠️ What I Did & How I Did It
+## Tools and technologies used
 
-### 1. SIEM & Infrastructure Engineering
-- Deployed Wazuh Manager on Kali Linux VM (VirtualBox)
-- Configured dual NICs:
-  - NAT (internet access)
-  - Host-only (internal communication)
-- Fixed Host-Only IPv4 binding issues
-- Reinstalled Wazuh + OpenSearch after corruption
-- Reconfigured OpenSearch (`opensearch.yml`):
-  - Changed binding from `127.0.0.1` → `0.0.0.0`
-  - Enabled external access for n8n integration
+- Wazuh SIEM (log collection and correlation)
+- Sysmon (Windows endpoint telemetry)
+- OpenSearch (alert indexing and querying)
+- n8n (workflow automation and orchestration)
+- Ollama (local LLM runtime)
+- Llama 3.2 (alert reasoning and classification model)
+- Discord webhooks (alert notification channel)
+- Virtualization platform (VirtualBox or equivalent lab setup)
 
 ---
 
-### 2. Endpoint Provisioning & Simulation
-- Installed Wazuh agent on Windows endpoint
-- Built MITRE-aligned simulation scripts:
-  - T1053.005: Scheduled tasks persistence
-  - T1547.001: Registry run keys
-  - T1071: DNS beaconing simulation
-  - T1560: Data staging/compression
-  - T1055: Process injection mimicry
+## How triage works
+
+The triage process follows a deterministic + AI hybrid model:
+
+1. Alerts are pulled from Wazuh at fixed intervals
+2. Each alert is assigned or evaluated for severity
+3. If severity is 5 or higher:
+   - Alert bypasses the LLM
+   - Immediately forwarded to Discord as a critical incident
+4. If severity is below 5:
+   - Alert is sent to Llama 3.2 via Ollama
+   - Model returns structured JSON output including:
+     - verdict
+     - confidence
+     - reasoning
+     - recommended action
+5. Final enriched alert is sent to responders via Discord
+
+This ensures critical events are never delayed or misclassified by the model.
 
 ---
 
-### 3. Pipeline Orchestration (n8n)
-- Built full event-driven workflow in :contentReference[oaicite:10]{index=10}
-- Implemented:
-  - Polling triggers
-  - REST API integration (Wazuh Manager API)
-  - JWT authentication flow (port 55000)
-  - JavaScript-based alert parsing
-  - Batch iteration processing logic
+## How it can help SOCs
+
+- Reduces Tier 1 analyst workload by automating repetitive alert triage
+- Filters noise from high-volume SIEM environments
+- Provides consistent initial classification for low and medium severity events
+- Ensures fast escalation of critical incidents through deterministic rules
+- Improves response time by reducing manual alert review overhead
 
 ---
 
-### 4. Local AI Engineering
-- Replaced rate-limited cloud LLM (Gemini API) with fully offline stack:
-  - :contentReference[oaicite:11]{index=11}
-  - :contentReference[oaicite:12]{index=12} (3B)
+## Business impact
 
-Key fixes:
-- Resolved JSON schema deserialization errors in n8n
-- Enforced strict boolean casting for API compatibility
-- Designed structured system prompt forcing JSON output:
-  - verdict
-  - confidence
-  - reasoning
-  - recommended_action
+This system helps organizations reduce operational cost in security monitoring by automating early-stage alert handling. It improves SOC efficiency, reduces analyst fatigue, and increases the speed of incident detection and escalation without relying on external AI APIs.
 
 ---
 
-## 📂 Project Structure
+## What can be customized
+
+This system is modular and can be adapted to different SOC environments, toolchains, and threat models. The following components can be modified:
+
+### 1. SIEM and log source
+- Replace Wazuh with other SIEM platforms (Splunk, Elastic Security, Sentinel)
+- Change log ingestion frequency and filters
+- Adjust rule severity mapping logic
+
+### 2. Endpoint telemetry
+- Swap Sysmon with other endpoint agents or EDR tools
+- Modify which event types are collected (process, registry, network, file activity)
+- Add or remove MITRE ATT&CK simulation scenarios
+
+### 3. Workflow orchestration
+- Replace n8n with alternatives like Node-RED, Apache Airflow, or custom Python pipelines
+- Adjust polling intervals and batch sizes
+- Modify routing logic for multi-tenant SOC environments
+
+### 4. LLM and reasoning layer
+- Replace Ollama with other local or cloud models
+- Swap Llama 3.2 with different models (Mistral, Qwen, Llama 3.1, etc.)
+- Change prompt structure and JSON output schema
+- Enable or disable AI triage entirely
+
+### 5. Alert routing and notifications
+- Replace Discord with Slack, Teams, email, or SIEM ticketing systems (ServiceNow, Jira)
+- Modify alert formatting and enrichment fields
+- Add escalation workflows for different severity tiers
+
+### 6. Security logic and triage rules
+- Change severity threshold for bypass logic
+- Add custom detection rules or heuristic scoring
+- Introduce multi-stage escalation (Tier 1 → Tier 2 → IR team)
+
+### 7. Infrastructure setup
+- Run components on Docker instead of VirtualBox
+- Deploy on cloud VMs instead of local lab machines
+- Split architecture into distributed services for scaling
+
+---
+
+## Summary
+
+This project demonstrates a flexible SOC automation pipeline combining SIEM telemetry, workflow automation, and local AI reasoning. It can be adapted to different environments by modifying the SIEM source, orchestration layer, model backend, and alert routing logic.
