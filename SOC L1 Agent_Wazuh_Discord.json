@@ -192,7 +192,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://discord.com/api/webhooks/1519814524557987862/CuqFbe9gkciYjmc92pSxezOakMt7oSRm6ObAq_nN5AEpbYQBU9xoyOTjZ3iGnPpo5Byl",
+        "url": "https://discord.com/api/webhooks/1519814524557987862/CuqFbe9gkciYjmc92pSxezOakMt7oSRm6ObAq_nN5AEpbYQBUXXXXXXXXXXXX",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
