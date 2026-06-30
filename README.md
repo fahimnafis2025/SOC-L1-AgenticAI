@@ -6,9 +6,10 @@ An automated Tier 1 SOC triage system that processes security telemetry from a W
 
 The system is designed to simulate a real SOC Tier 1 analyst workflow with deterministic controls and AI-assisted decision support.
 
-Check the full documentation here: [AI Powered SOC Triage Lab] (https://github.com/fahimnafis2025/SOC-L1-AgenticAI/blob/main/SOC%20L1%20Triage%20Lab%20Documentation.pdf)
+Check the full documentation here: [AI Powered SOC Triage Lab](https://github.com/fahimnafis2025/SOC-L1-AgenticAI/blob/main/SOC%20L1%20Triage%20Lab%20Documentation.pdf)
 
-Check the n8n template json here: [n8n template] (https://github.com/fahimnafis2025/SOC-L1-AgenticAI/blob/main/SOC%20L1%20Agent_Wazuh_Discord.json)
+Check the n8n template json here: [n8n template](https://github.com/fahimnafis2025/SOC-L1-AgenticAI/blob/main/SOC%20L1%20Agent_Wazuh_Discord.json)
+
 ---
 
 ## What it does
